@@ -54,3 +54,28 @@ BuildContext sendiri merupakan objek yang menyimpan informasi penting mengenai p
 
 
 Hot reload memungkinkan developer untuk memperbarui code dan langsung melihat hasilnya tanpa kehilangan state aplikasi yang sedang berjalan, fitur ini mempercepat proses pengembangan karena tidak perlu menjalankan ulang seluruh aplikasi. Sementara itu, hot restart akan memuat ulang dari awal dan menghapus semua state yang tersimpan.
+
+
+
+
+
+# TUGAS 8
+
+1)  Jelaskan perbedaan antara Navigator.push() dan Navigator.pushReplacement() pada Flutter. Dalam kasus apa sebaiknya masing-masing digunakan pada aplikasi Football Shop kamu?
+
+navigator.push() digunakan untuk memberikan halaman baru di atas halaman sebelumnya, sehinga pengguna bisa memencet tombol back untuk kembali ke halaman sebelumnya. Sedangkan Navigator.pushReplacement() akan mengganti haaman saat ini dengan halaman baru, sehingga pengguna tidak akan bisa kembali ke halaman sebelumnya. Pada Wonderwall Kicks, Navigator.push() bisa digunakan untuk navigasi melihat detail produk dari halaman daftar barang. Sedangkan Navigator.pushReplacement() dapat digunakan untuk fitur login/logout
+
+2)  Bagaimana kamu memanfaatkan hierarchy widget seperti Scaffold, AppBar, dan Drawer untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+
+
+Scaffold digunakan sebagai dasar kerangka utama tiap haaman karena menyediakan struktur dasar seperti AppBar, Drawer, dan Body. AppBar menampilkan judul halaman atau logo Football Shop, sedangkan Drawer berisi menu navigasi sepperti "Home", "Add Product", dan "Logout"
+
+
+3)  Dalam konteks desain antarmuka, apa kelebihan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen-elemen form? Berikan contoh penggunaannya dari aplikasi kamu.
+
+Widget seperti Padding digunakan untuk memberi jarak antar elemen form agar tampilan nya rapi dan tidak terlalu rapat, kemudian SingleChildScrollView digunakan agar form bisa di scroll, terutama ketika layar kecil/keyboard muncul. Sedangkan ListView cocok untuk menampilkan banya elemen berulang seperti daftar produk. Contoh pada wonderwall kicks, pada halaman Add Product, form diletakan pada SingleChildScrollView dengan Padding di setiap TextFormField agar rapi dan tetap bisa di scroll
+
+4)  Bagaimana kamu menyesuaikan warna tema agar aplikasi Football Shop memiliki identitas visual yang konsisten dengan brand toko?
+
+Warna tema diatur melalui ThemeData pada widget MaterialApp, misal dengan menentukan primaryColor, colorScheme, dan scaffoldBackgrounColor. Dengan begitu, seluruh tampilan AppBar, tombol, dan ikon akan mengikuti identitas yang konsisten diseluruh halaman aplikasi
+
