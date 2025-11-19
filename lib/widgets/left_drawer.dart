@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wonderwall_kicks_mobile/screens/menu.dart';
 import 'package:wonderwall_kicks_mobile/screens/product_form_page.dart';
+// Import untuk Product List Page
+import 'package:wonderwall_kicks_mobile/screens/product_entry_list.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -50,6 +52,17 @@ class LeftDrawer extends StatelessWidget {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const ProductFormPage()),
+              );
+            },
+          ),
+          // Product List Tile
+          ListTile(
+            leading: const Icon(Icons.list_alt),
+            title: const Text('Daftar Produk'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProductEntryListPage()),
               );
             },
           ),

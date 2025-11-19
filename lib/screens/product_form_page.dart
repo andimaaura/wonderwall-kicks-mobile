@@ -1,5 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 import 'package:wonderwall_kicks_mobile/widgets/left_drawer.dart';
+import 'package:wonderwall_kicks_mobile/screens/product_entry_list.dart';
 
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({super.key});
@@ -18,7 +23,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
   bool _isFeatured = false;
 
   final List<String> _categories = const [
-    'jersey', 'shoes', 'ball', 'accessories', 'poster'
+    'jersey',
+    'shoes',
+    'ball',
+    'accessories',
+    'poster'
   ];
 
   void _resetForm() {
@@ -35,6 +44,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Tambah Produk Baru')),
@@ -49,7 +60,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // NAME
+              // Nama Produk
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: "Nama Produk",
@@ -64,7 +75,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               ),
               const SizedBox(height: 12),
 
-              // PRICE
+              // Harga
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: "Harga (Rp)",
@@ -72,9 +83,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (v) {
-                  setState(() {
-                    _price = int.tryParse(v) ?? 0;
-                  });
+                  setState(() => _price = int.tryParse(v) ?? 0);
                 },
                 validator: (v) {
                   if (v == null || v.isEmpty) return "Harga tidak boleh kosong!";
@@ -86,7 +95,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               ),
               const SizedBox(height: 12),
 
-              // DESCRIPTION
+              // Deskripsi
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: "Deskripsi Produk",
@@ -102,7 +111,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               ),
               const SizedBox(height: 12),
 
-              // CATEGORY
+              // Kategori
               DropdownButtonFormField<String>(
                 value: _category,
                 decoration: const InputDecoration(
@@ -115,11 +124,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
                           child: Text(cat[0].toUpperCase() + cat.substring(1)),
                         ))
                     .toList(),
-                onChanged: (v) => setState(() => _category = v!),
+                onChanged: (v) => setState(() => _category = v ?? "jersey"),
               ),
               const SizedBox(height: 12),
 
-              // THUMBNAIL URL
+              // Thumbnail URL
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: "URL Thumbnail",
@@ -128,57 +137,77 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 onChanged: (v) => setState(() => _thumbnail = v),
                 validator: (v) {
                   if (v == null || v.isEmpty) return "URL thumbnail wajib diisi!";
-                  final regex = Uri.tryParse(v);
-                  if (regex == null || !regex.hasAbsolutePath) return "URL tidak valid!";
+                  final uri = Uri.tryParse(v);
+                  if (uri == null || !uri.hasAbsolutePath) return "URL tidak valid!";
                   return null;
                 },
               ),
               const SizedBox(height: 12),
 
-              // FEATURED
+              // Produk unggulan
               SwitchListTile(
                 title: const Text("Tandai sebagai produk unggulan"),
                 value: _isFeatured,
                 onChanged: (v) => setState(() => _isFeatured = v),
               ),
 
-              // SUBMIT
+              const SizedBox(height: 20),
+
+              // Tombol Submit
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Produk berhasil disimpan!'),
-                          content: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Nama: $_name'),
-                                Text('Harga: Rp $_price'),
-                                Text('Deskripsi: $_description'),
-                                Text('Kategori: $_category'),
-                                Text('Thumbnail: $_thumbnail'),
-                                Text('Unggulan: ${_isFeatured ? "Ya" : "Tidak"}'),
-                              ],
+                      final thumbnailValue = _thumbnail.isEmpty ? "" : _thumbnail;
+
+                      try {
+                        final response = await request.postJson(
+                          "http://127.0.0.1:8000/auth/create-product-flutter/",
+                          jsonEncode({
+                            "name": _name,
+                            "price": _price,
+                            "description": _description,
+                            "category": _category,
+                            "thumbnail": thumbnailValue,
+                            "is_featured": _isFeatured,
+                          }),
+                        );
+
+                        if (!context.mounted) return;
+
+                        if (response['status'] == 'success') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Produk berhasil disimpan!")),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProductEntryListPage(),
                             ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Terjadi kesalahan: ${response['message'] ?? 'Coba lagi'}",
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Gagal koneksi ke server: $e"),
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                _resetForm();
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
+                        );
+                      }
                     }
                   },
-                  child: const Text("Save", style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    "Save",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],
